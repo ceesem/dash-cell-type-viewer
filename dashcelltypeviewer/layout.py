@@ -35,6 +35,7 @@ def page_layout(state: State = {}):
     layout : list
         List of layout components for the dash app.
     """
+
     cell_type_query = html.Div(
         children=[
             dbc.Row(
@@ -43,9 +44,16 @@ def page_layout(state: State = {}):
                         [
                             html.Div("Cell Type Table:"),
                             dcc.Dropdown(
-                                options=[],
-                                id="cell-type-table-menu",
-                                placeholder="Select a Cell Type Table",
+                                **create_component_kwargs(
+                                    state,
+                                    id_inner="cell-type-table-menu",
+                                    placeholder="Select a Cell Type Table",
+                                    options=[],
+                                    value=None,
+                                ),
+                                # options=[],
+                                # id="cell-type-table-menu",
+                                # placeholder="Select a Cell Type Table",
                             ),
                         ],
                         width={"size": 4, "offset": 1},

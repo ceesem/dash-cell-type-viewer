@@ -1,4 +1,4 @@
-from dash_app_template import create_app
+from dashcelltypeviewer import create_app
 
 ###########################################################
 # This run.py will work for local testing of the dash app #

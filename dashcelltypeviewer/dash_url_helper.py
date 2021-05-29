@@ -114,5 +114,4 @@ def setup(app: dash.Dash, page_layout: Callable[[State], Any]):
 
         params = urlencode(state, safe="%/:?~#+!$,;'@()*[]\"", quote_via=quote)
 
-        print(f"update_url_state values={values} params={params}")
         return f"?{params}"

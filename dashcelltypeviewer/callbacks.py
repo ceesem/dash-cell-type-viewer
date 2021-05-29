@@ -49,7 +49,12 @@ def register_callbacks(app, config):
         Dict for standard parameter values
     """
 
-    @app.callback(Output("cell-type-table-menu", "options"), InputDatastack)
+    @app.callback(
+        Output(
+            {"id_inner": "cell-type-table-menu", "type": _COMPONENT_ID_TYPE}, "options"
+        ),
+        InputDatastack,
+    )
     def cell_type_dropdown(datastack):
         try:
             client = make_client(datastack, config)
@@ -71,7 +76,10 @@ def register_callbacks(app, config):
         Output("client-info-json", "data"),
         Input("submit-button", "n_clicks"),
         InputDatastack,
-        State("cell-type-table-menu", "value"),
+        State(
+            {"id_inner": "cell-type-table-menu", "type": _COMPONENT_ID_TYPE}, "value"
+        ),
+        # State("cell-type-table-menu", "value"),
         State({"id_inner": "anno-id", "type": _COMPONENT_ID_TYPE}, "value"),
         State({"id_inner": "root-id", "type": _COMPONENT_ID_TYPE}, "value"),
     )
