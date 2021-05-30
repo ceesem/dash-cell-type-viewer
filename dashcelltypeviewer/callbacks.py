@@ -89,8 +89,8 @@ def register_callbacks(app, config):
         try:
             client = make_client(datastack, config)
             info_cache = client.info.info_cache[datastack]
-        except:
-            return [], "", "", EMPTY_INFO_CACHE
+        except Exception as e:
+            return [], str(e), "", EMPTY_INFO_CACHE
 
         if cell_type_table is None:
             return [], "", "", info_cache
