@@ -15,9 +15,15 @@ from .dash_url_helper import _COMPONENT_ID_TYPE
 EMPTY_INFO_CACHE = {"aligned_volumes": {}}
 
 InputDatastack = Input({"id_inner": "datastack", "type": _COMPONENT_ID_TYPE}, "value")
-# StateCellType = State({"id_inner": "cell-type", "type": _COMPONENT_ID_TYPE}, "value")
-# StateRootID = State({"id_inner": "root-id", "type": _COMPONENT_ID_TYPE}, "value")
-# StateAnnoID = State({"id_inner": "anno-id", "type": _COMPONENT_ID_TYPE}, "value")
+OutputCellTypeMenuOptions = Output(
+    {"id_inner": "cell-type-table-menu", "type": _COMPONENT_ID_TYPE}, "options"
+)
+StateCellTypeMenu = State(
+    {"id_inner": "cell-type-table-menu", "type": _COMPONENT_ID_TYPE}, "value"
+)
+StateCellType = State({"id_inner": "cell-type", "type": _COMPONENT_ID_TYPE}, "value")
+StateRootID = State({"id_inner": "root-id", "type": _COMPONENT_ID_TYPE}, "value")
+StateAnnoID = State({"id_inner": "anno-id", "type": _COMPONENT_ID_TYPE}, "value")
 
 
 def make_client(datastack, config):
@@ -50,9 +56,7 @@ def register_callbacks(app, config):
     """
 
     @app.callback(
-        Output(
-            {"id_inner": "cell-type-table-menu", "type": _COMPONENT_ID_TYPE}, "options"
-        ),
+        OutputCellTypeMenuOptions,
         InputDatastack,
     )
     def cell_type_dropdown(datastack):
@@ -76,14 +80,12 @@ def register_callbacks(app, config):
         Output("client-info-json", "data"),
         Input("submit-button", "n_clicks"),
         InputDatastack,
-        State(
-            {"id_inner": "cell-type-table-menu", "type": _COMPONENT_ID_TYPE}, "value"
-        ),
-        # State("cell-type-table-menu", "value"),
-        State({"id_inner": "anno-id", "type": _COMPONENT_ID_TYPE}, "value"),
-        State({"id_inner": "root-id", "type": _COMPONENT_ID_TYPE}, "value"),
+        StateCellTypeMenu,
+        StateAnnoID,
+        StateRootID,
+        StateCellType,
     )
-    def update_table(clicks, datastack, cell_type_table, anno_id, root_id):
+    def update_table(clicks, datastack, cell_type_table, anno_id, root_id, cell_type):
         try:
             client = make_client(datastack, config)
             info_cache = client.info.info_cache[datastack]
@@ -97,33 +99,31 @@ def register_callbacks(app, config):
             anno_id = ""
         if root_id is None:
             root_id == ""
+        if cell_type is None:
+            cell_type == ""
 
-        if len(anno_id) == 0 and len(root_id) == 0:
-            df = client.materialize.live_query(
-                cell_type_table,
-                timestamp=datetime.datetime.now(),
-                split_positions=True,
-            )
-            output_report = ""
-        elif len(anno_id) > 0 and len(root_id) > 0:
+        filter_equal_dict = {}
+        if len(anno_id) > 0 and len(root_id) > 0:
             df = pd.DataFrame(columns=ct_table_columns)
             output_report = "Please set either anno id or root id but not both"
-        elif len(anno_id) > 0:
-            df = client.materialize.live_query(
-                cell_type_table,
-                filter_equal_dict={"id": int(anno_id)},
-                timestamp=datetime.datetime.now(),
-                split_positions=True,
-            )
-            output_report = ""
         else:
+            if len(anno_id) > 0:
+                filter_equal_dict.update({"id": int(anno_id)})
+            if len(root_id) > 0:
+                filter_equal_dict.update({"pt_root_id": int(root_id)})
+            if len(cell_type) > 0:
+                filter_equal_dict.update({"cell_type": cell_type})
+            if len(filter_equal_dict) == 0:
+                filter_equal_dict = None
+
             df = client.materialize.live_query(
                 cell_type_table,
-                filter_equal_dict={"pt_root_id": int(root_id)},
+                filter_equal_dict=filter_equal_dict,
                 timestamp=datetime.datetime.now(),
                 split_positions=True,
             )
             output_report = ""
+
         ct_df = stringify_root_ids(process_dataframe(df))
         return (
             ct_df.to_dict("records"),
@@ -151,7 +151,6 @@ def register_callbacks(app, config):
             sb = generate_statebuilder(info_cache, anno_layer="anno")
             return sb.render_state(None, return_as="url"), ""
         else:
-            print("trying the fancy version")
             df = pd.DataFrame(rows)
             df["pt_position"] = df.apply(assemble_pt_position, axis=1)
             return generate_url_cell_types(selected_rows, df, info_cache), ""
