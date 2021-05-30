@@ -116,13 +116,17 @@ def register_callbacks(app, config):
             if len(filter_equal_dict) == 0:
                 filter_equal_dict = None
 
-            df = client.materialize.live_query(
-                cell_type_table,
-                filter_equal_dict=filter_equal_dict,
-                timestamp=datetime.datetime.now(),
-                split_positions=True,
-            )
-            output_report = ""
+            try:
+                df = client.materialize.live_query(
+                    cell_type_table,
+                    filter_equal_dict=filter_equal_dict,
+                    timestamp=datetime.datetime.now(),
+                    split_positions=True,
+                )
+                output_report = ""
+            except Exception as e:
+                df = pd.DataFrame(columns=ct_table_columns)
+                output_report = str(e)
 
         ct_df = stringify_root_ids(process_dataframe(df))
         return (
