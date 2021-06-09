@@ -71,8 +71,6 @@ def generate_statebuilder(
 
 
 def generate_url_cell_types(selected_rows, df, info_cache, palette="tab20"):
-    # if selected_rows is None:
-    # selected_rows = []
     if len(selected_rows) > 0 or selected_rows is None:
         df = df.iloc[selected_rows].reset_index(drop=True)
     cell_types = pd.unique(df["cell_type"])

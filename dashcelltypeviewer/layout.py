@@ -128,36 +128,6 @@ def page_layout(state: State = {}):
                         width={"size": 1},
                         align="end",
                     ),
-                    # dbc.Col(
-                    #     [
-                    #         html.Div("Annotation ID:"),
-                    #         dcc.Input(
-                    #             **create_component_kwargs(
-                    #                 state,
-                    #                 id_inner="anno-id",
-                    #                 value="",
-                    #                 type="text",
-                    #             ),
-                    #         ),
-                    #     ],
-                    #     width={"size": 2, "offset": 1},
-                    #     align="end",
-                    # ),
-                    # dbc.Col(
-                    #     [
-                    #         html.Div("Root ID:"),
-                    #         dcc.Input(
-                    #             **create_component_kwargs(
-                    #                 state,
-                    #                 value="",
-                    #                 id_inner="root-id",
-                    #                 type="text",
-                    #             ),
-                    #         ),
-                    #     ],
-                    #     width={"size": 2, "offset": 0},
-                    #     align="end",
-                    # ),
                     dbc.Col(
                         [
                             html.Div("Cell Type:"),
@@ -178,7 +148,6 @@ def page_layout(state: State = {}):
                     ),
                 ],
                 justify="start",
-                # no_gutters=True,
             ),
             html.Hr(),
         ]
@@ -220,26 +189,24 @@ def page_layout(state: State = {}):
             justify="start",
         )
     )
-
     ngl_link = dbc.Row(
         [
             dbc.Col(
                 dcc.Loading(
                     id="loading-link",
                     children=html.Div(id="link-loading-placeholder", children=""),
-                    type="dot",
-                    style={"transform": "scale(0.75)"},
+                    type="circle",
+                    style={"transform": "scale(0.5)"},
                 ),
                 width={"size": 1, "offset": 0},
-                align="circle",
             ),
             dbc.Col(
                 html.A(
-                    "Neuroglancer Link",
+                    "Filtered/Selected Rows - Neuroglancer",
                     id="ngl-link",
                     href="",
                     target="_blank",
-                    style={"font-size": "18px"},
+                    style={"font-size": "16px"},
                 ),
                 width={"size": 2, "offset": 0},
                 align="start",
@@ -250,6 +217,28 @@ def page_layout(state: State = {}):
                     children="Reset Selection",
                     color="primary",
                     size="sm",
+                ),
+                width={"size": 1, "offset": 0},
+            ),
+            dbc.Col(
+                html.A(
+                    "All Data — Neuroglancer",
+                    id="ngl-link-all-data",
+                    href="",
+                    target="_blank",
+                    style={"font-size": "16px"},
+                ),
+                width={"size": 2, "offset": 3},
+                align="start",
+            ),
+            dbc.Col(
+                dcc.Loading(
+                    id="loading-link-all-data",
+                    children=html.Div(
+                        id="link-loading-placeholder-all-data", children=""
+                    ),
+                    type="circle",
+                    style={"transform": "scale(0.5)"},
                 ),
                 width={"size": 1, "offset": 0},
             ),
@@ -268,9 +257,18 @@ def page_layout(state: State = {}):
         ),
     )
 
+    title_row = dbc.Row(
+        [
+            dbc.Col(
+                html.H3("Cell Type Table Lookup"),
+                width={"size": 6, "offset": 1},
+            ),
+        ],
+    )
+
     layout = html.Div(
         children=[
-            html.Div("Table Lookup"),
+            title_row,
             html.Div(cell_type_query),
             html.Div(ngl_link),
             html.Div(data_table),

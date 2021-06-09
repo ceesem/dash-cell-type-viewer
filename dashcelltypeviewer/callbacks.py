@@ -192,18 +192,19 @@ def register_callbacks(app, config):
 
     pass
 
-    # @app.callback(
-    #     Output("ngl-link-all-data", "href"),
-    #     Output("link-loading-placeholder-all-data", "children"),
-    #     Input("data-table", "data"),
-    #     Input("client-info-json", "data"),
-    # )
-    # def update_link_all_data(rows, info_cache):
-    #     if rows is None or len(rows) == 0:
-    #         sb = generate_statebuilder(info_cache, anno_layer="anno")
-    #         return sb.render_state(None, return_as="url"), ""
-    #     else:
-    #         df = pd.DataFrame(rows)
-    #         df["pt_position"] = df.apply(assemble_pt_position, axis=1)
-    #         return generate_url_cell_types(np.arange(len(df)), df, info_cache), ""
+    @app.callback(
+        Output("ngl-link-all-data", "href"),
+        Output("link-loading-placeholder-all-data", "children"),
+        Input("data-table", "data"),
+        Input("client-info-json", "data"),
+    )
+    def update_link_all_data(rows, info_cache):
+        if rows is None or len(rows) == 0:
+            sb = generate_statebuilder(info_cache, anno_layer="anno")
+            return sb.render_state(None, return_as="url"), ""
+        else:
+            df = pd.DataFrame(rows)
+            df["pt_position"] = df.apply(assemble_pt_position, axis=1)
+            return generate_url_cell_types([], df, info_cache), ""
+
     pass
