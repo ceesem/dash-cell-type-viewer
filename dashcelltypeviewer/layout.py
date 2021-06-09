@@ -52,9 +52,6 @@ def page_layout(state: State = {}):
                                     options=[],
                                     value=None,
                                 ),
-                                # options=[],
-                                # id="cell-type-table-menu",
-                                # placeholder="Select a Cell Type Table",
                             ),
                         ],
                         width={"size": 4, "offset": 1},
@@ -122,10 +119,14 @@ def page_layout(state: State = {}):
                                         },
                                     ],
                                     value="root_id",
+                                    style={
+                                        "margin-left": "12px",
+                                        "font-size": "12px",
+                                    },
                                 )
-                            )
+                            ),
                         ],
-                        width={"size": 1},
+                        width={"size": 2, "offset": 0},
                         align="end",
                     ),
                     dbc.Col(
