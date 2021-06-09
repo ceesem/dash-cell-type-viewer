@@ -89,6 +89,7 @@ def register_callbacks(app, config):
         try:
             client = make_client(datastack, config)
             info_cache = client.info.info_cache[datastack]
+            info_cache["global_server"] = client.server_address
         except Exception as e:
             return [], str(e), "", EMPTY_INFO_CACHE
 

@@ -17,7 +17,7 @@ def viewer_site(info_cache):
 
 
 def state_server(info_cache):
-    return f"{info_cache['local_server']}/nglstate/api/v1/post"
+    return f"{info_cache['global_server']}/nglstate/api/v1/post"
 
 
 def generate_statebuilder(
