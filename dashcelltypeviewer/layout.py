@@ -1,4 +1,5 @@
 import dash_core_components as dcc
+from dash_core_components.Dropdown import Dropdown
 import dash_table
 import dash_html_components as html
 import dash_bootstrap_components as dbc
@@ -87,7 +88,7 @@ def page_layout(state: State = {}):
                 [
                     dbc.Col(
                         [
-                            html.Div("Annotation ID:"),
+                            html.Div("Cell ID:"),
                             dcc.Input(
                                 **create_component_kwargs(
                                     state,
@@ -97,24 +98,66 @@ def page_layout(state: State = {}):
                                 ),
                             ),
                         ],
-                        width={"size": 2, "offset": 1},
+                        width={"size": 1, "offset": 1},
                         align="end",
                     ),
                     dbc.Col(
                         [
-                            html.Div("Root ID:"),
-                            dcc.Input(
+                            dcc.Dropdown(
                                 **create_component_kwargs(
                                     state,
-                                    value="",
-                                    id_inner="root-id",
-                                    type="text",
-                                ),
-                            ),
+                                    id_inner="id-type",
+                                    options=[
+                                        {
+                                            "label": "Root ID",
+                                            "value": "root_id",
+                                        },
+                                        {
+                                            "label": "Nucleus ID",
+                                            "value": "nucleus_id",
+                                        },
+                                        {
+                                            "label": "Annotation ID",
+                                            "value": "anno_id",
+                                        },
+                                    ],
+                                    value="root_id",
+                                )
+                            )
                         ],
-                        width={"size": 2, "offset": 0},
+                        width={"size": 1},
                         align="end",
                     ),
+                    # dbc.Col(
+                    #     [
+                    #         html.Div("Annotation ID:"),
+                    #         dcc.Input(
+                    #             **create_component_kwargs(
+                    #                 state,
+                    #                 id_inner="anno-id",
+                    #                 value="",
+                    #                 type="text",
+                    #             ),
+                    #         ),
+                    #     ],
+                    #     width={"size": 2, "offset": 1},
+                    #     align="end",
+                    # ),
+                    # dbc.Col(
+                    #     [
+                    #         html.Div("Root ID:"),
+                    #         dcc.Input(
+                    #             **create_component_kwargs(
+                    #                 state,
+                    #                 value="",
+                    #                 id_inner="root-id",
+                    #                 type="text",
+                    #             ),
+                    #         ),
+                    #     ],
+                    #     width={"size": 2, "offset": 0},
+                    #     align="end",
+                    # ),
                     dbc.Col(
                         [
                             html.Div("Cell Type:"),
@@ -126,7 +169,8 @@ def page_layout(state: State = {}):
                                     type="text",
                                 ),
                             ),
-                        ]
+                        ],
+                        width={"size": 1, "offset": 1},
                     ),
                     dbc.Col(
                         [html.Div(children="", id="report-text")],
@@ -134,6 +178,7 @@ def page_layout(state: State = {}):
                     ),
                 ],
                 justify="start",
+                # no_gutters=True,
             ),
             html.Hr(),
         ]

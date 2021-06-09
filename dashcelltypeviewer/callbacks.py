@@ -22,8 +22,9 @@ StateCellTypeMenu = State(
     {"id_inner": "cell-type-table-menu", "type": _COMPONENT_ID_TYPE}, "value"
 )
 StateCellType = State({"id_inner": "cell-type", "type": _COMPONENT_ID_TYPE}, "value")
-StateRootID = State({"id_inner": "root-id", "type": _COMPONENT_ID_TYPE}, "value")
+# StateRootID = State({"id_inner": "root-id", "type": _COMPONENT_ID_TYPE}, "value")
 StateAnnoID = State({"id_inner": "anno-id", "type": _COMPONENT_ID_TYPE}, "value")
+StateCategoryID = State({"id_inner": "id-type", "type": _COMPONENT_ID_TYPE}, "value")
 
 
 def make_client(datastack, config):
@@ -33,6 +34,19 @@ def make_client(datastack, config):
         datastack, server_address=server_address, auth_token=auth_token
     )
     return client
+
+
+NUCLEUS_TABLE = "nucleus_neuron_svm"
+
+
+def get_root_id_from_nuc_id(nuc_id, client, timestamp, nucleus_table=NUCLEUS_TABLE):
+    df = client.materialize.live_query(
+        nucleus_table, timestamp=timestamp, filter_equal_dict={"id": nuc_id}
+    )
+    if len(df) == 0:
+        return None
+    else:
+        return df.iloc[0]["pt_root_id"]
 
 
 ######################################
@@ -82,10 +96,10 @@ def register_callbacks(app, config):
         InputDatastack,
         StateCellTypeMenu,
         StateAnnoID,
-        StateRootID,
+        StateCategoryID,
         StateCellType,
     )
-    def update_table(clicks, datastack, cell_type_table, anno_id, root_id, cell_type):
+    def update_table(clicks, datastack, cell_type_table, anno_id, id_type, cell_type):
         try:
             client = make_client(datastack, config)
             info_cache = client.info.info_cache[datastack]
@@ -96,22 +110,38 @@ def register_callbacks(app, config):
         if cell_type_table is None:
             return [], "", "", info_cache
 
+        if len(anno_id) == 0:
+            anno_id = None
+            id_type = "anno_id"
+
+        timestamp = datetime.datetime.now()
         if anno_id is None:
-            anno_id = ""
-        if root_id is None:
-            root_id == ""
+            root_id = None
+        else:
+            if id_type == "root_id":
+                root_id = int(anno_id)
+                anno_id = None
+            elif id_type == "nucleus_id":
+                root_id = get_root_id_from_nuc_id(int(anno_id), client, timestamp)
+                anno_id = None
+            elif id_type == "anno_id":
+                anno_id = int(anno_id)
+                root_id = None
+            else:
+                raise ValueError('id_type must be either "root_id" or "nucleus_id"')
+
         if cell_type is None:
             cell_type == ""
 
         filter_equal_dict = {}
-        if len(anno_id) > 0 and len(root_id) > 0:
+        if anno_id is not None and root_id is not None:
             df = pd.DataFrame(columns=ct_table_columns)
             output_report = "Please set either anno id or root id but not both"
         else:
-            if len(anno_id) > 0:
-                filter_equal_dict.update({"id": int(anno_id)})
-            if len(root_id) > 0:
-                filter_equal_dict.update({"pt_root_id": int(root_id)})
+            if anno_id is not None:
+                filter_equal_dict.update({"id": anno_id})
+            if root_id is not None:
+                filter_equal_dict.update({"pt_root_id": root_id})
             if len(cell_type) > 0:
                 filter_equal_dict.update({"cell_type": cell_type})
             if len(filter_equal_dict) == 0:
@@ -121,7 +151,7 @@ def register_callbacks(app, config):
                 df = client.materialize.live_query(
                     cell_type_table,
                     filter_equal_dict=filter_equal_dict,
-                    timestamp=datetime.datetime.now(),
+                    timestamp=timestamp,
                     split_positions=True,
                 )
                 output_report = ""
@@ -160,4 +190,20 @@ def register_callbacks(app, config):
             df["pt_position"] = df.apply(assemble_pt_position, axis=1)
             return generate_url_cell_types(selected_rows, df, info_cache), ""
 
+    pass
+
+    # @app.callback(
+    #     Output("ngl-link-all-data", "href"),
+    #     Output("link-loading-placeholder-all-data", "children"),
+    #     Input("data-table", "data"),
+    #     Input("client-info-json", "data"),
+    # )
+    # def update_link_all_data(rows, info_cache):
+    #     if rows is None or len(rows) == 0:
+    #         sb = generate_statebuilder(info_cache, anno_layer="anno")
+    #         return sb.render_state(None, return_as="url"), ""
+    #     else:
+    #         df = pd.DataFrame(rows)
+    #         df["pt_position"] = df.apply(assemble_pt_position, axis=1)
+    #         return generate_url_cell_types(np.arange(len(df)), df, info_cache), ""
     pass
